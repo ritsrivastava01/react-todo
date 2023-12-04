@@ -1,3 +1,4 @@
+import { signal } from "@preact/signals-react";
 import { FormEvent, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 type Todo = {
@@ -7,6 +8,10 @@ type Todo = {
 };
 export default function TodoPanel() {
   const LOCAL_STORAGE_KEY = "react-todo";
+  const name = signal<number>(1);
+  setInterval(() => {
+    name.value = Math.random();
+  }, 500);
   const [todoName, setTodoName] = useState<string>("");
   const [todoList, setTodoList] = useState<Todo[]>(() => {
     const values = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -40,6 +45,7 @@ export default function TodoPanel() {
   }, [todoList]);
   return (
     <>
+      <h1>TODO - {name}</h1>
       <form className="flex flex-col" onSubmit={addTodo}>
         <input
           type="text"
