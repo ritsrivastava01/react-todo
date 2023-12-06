@@ -1,4 +1,4 @@
-import { signal } from "@preact/signals-react";
+import { effect, signal } from "@preact/signals-react";
 import { FormEvent, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 type Todo = {
@@ -6,46 +6,42 @@ type Todo = {
   completed: boolean;
   id: string;
 };
+
+const LOCAL_STORAGE_KEY = "react-todo";
+const getTodoItems = () => {
+  const values = localStorage.getItem(LOCAL_STORAGE_KEY);
+  return values ? JSON.parse(values) : [];
+};
+export const todos = signal<Todo[]>(getTodoItems());
+
+effect(() => {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
+});
 export default function TodoPanel() {
-  const LOCAL_STORAGE_KEY = "react-todo";
-  const name = signal<number>(1);
-  setInterval(() => {
-    name.value = Math.random();
-  }, 500);
   const [todoName, setTodoName] = useState<string>("");
-  const [todoList, setTodoList] = useState<Todo[]>(() => {
-    const values = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return values ? JSON.parse(values) : [];
-  });
+  //const [todoList, setTodoList] = useState<Todo[]>(() => {});
 
   const addTodo = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setTodoList((prevTodo) => {
-      return [
-        ...prevTodo,
-        {
-          title: todoName,
-          completed: false,
-          id: uuidv4(),
-        },
-      ];
-    });
+    todos.value = [
+      ...todos.value,
+      {
+        title: todoName,
+        completed: false,
+        id: uuidv4(),
+      },
+    ];
     setTodoName("");
   };
   const toggleTodo = (todoId: string, completed: boolean) => {
-    setTodoList((prevTodo) => {
-      return prevTodo.map((todo) =>
-        todo.id === todoId ? { ...todo, completed } : todo
-      );
-    });
+    todos.value = todos.value.map((todo: Todo) =>
+      todo.id === todoId ? { ...todo, completed } : todo
+    );
   };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todoList));
-  }, [todoList]);
   return (
     <>
-      <h1>TODO - {name}</h1>
+      <h1>TODO</h1>
       <form className="flex flex-col" onSubmit={addTodo}>
         <input
           type="text"
@@ -59,7 +55,7 @@ export default function TodoPanel() {
         </button>
       </form>
       <ul className="list-none">
-        {todoList.map((todo) => (
+        {todos.value.map((todo: Todo) => (
           <div className="flex flex-row" key={todo.id}>
             <label className="prose prose-h1 hover:font-bold cursor-pointer">
               <input
