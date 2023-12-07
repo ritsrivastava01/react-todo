@@ -1,21 +1,13 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-type Todo = {
-  title: string;
-  completed: boolean;
-  id: string;
-};
-export default function TodoPanel() {
-  const LOCAL_STORAGE_KEY = "react-todo";
-  const [todoName, setTodoName] = useState<string>("");
-  const [todoList, setTodoList] = useState<Todo[]>(() => {
-    const values = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return values ? JSON.parse(values) : [];
-  });
+import { Todo, useTodoContext } from "../hooks/TodoContextProvider";
 
+export default function TodoPanel() {
+  const [todoName, setTodoName] = useState<string>("");
+  const { todos, setTodos } = useTodoContext();
   const addTodo = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setTodoList((prevTodo) => {
+    setTodos((prevTodo: Todo[]) => {
       return [
         ...prevTodo,
         {
@@ -28,16 +20,18 @@ export default function TodoPanel() {
     setTodoName("");
   };
   const toggleTodo = (todoId: string, completed: boolean) => {
-    setTodoList((prevTodo) => {
-      return prevTodo.map((todo) =>
+    setTodos((prevTodos: Todo[]) => {
+      return prevTodos.map((todo) =>
         todo.id === todoId ? { ...todo, completed } : todo
       );
     });
+    // setTodos((prevTodo: Todo[]) => {
+    //   return prevTodo.map((todo) =>
+    //     todo.id === todoId ? { ...todo, completed } : todo
+    //   );
+    // });
   };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todoList));
-  }, [todoList]);
   return (
     <>
       <form className="flex flex-col" onSubmit={addTodo}>
@@ -53,7 +47,7 @@ export default function TodoPanel() {
         </button>
       </form>
       <ul className="list-none">
-        {todoList.map((todo) => (
+        {todos.map((todo: Todo) => (
           <div className="flex flex-row" key={todo.id}>
             <label className="prose prose-h1 hover:font-bold cursor-pointer">
               <input
