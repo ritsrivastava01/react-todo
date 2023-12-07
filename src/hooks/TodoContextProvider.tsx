@@ -1,6 +1,7 @@
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -35,13 +36,13 @@ export default function TodoContextProvider({ children }: PropsWithChildren) {
     });
   };
 
-  const toggleTodo = (todoId: string, completed: boolean) => {
+  const toggleTodo = useCallback((todoId: string, completed: boolean) => {
     setTodos((prevTodos: Todo[]) => {
       return prevTodos.map((todo) =>
         todo.id === todoId ? { ...todo, completed } : todo
       );
     });
-  };
+  }, []);
 
   const deleteTodo = (todoId: string) => {
     setTodos((prevTodo: Todo[]) => {

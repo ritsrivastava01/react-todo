@@ -4,6 +4,7 @@ import { Todo, useTodoContext } from "../hooks/TodoContextProvider";
 import { Trash } from "phosphor-react";
 
 export default function TodoPanel() {
+  console.log("Todo Panel");
   const [todoName, setTodoName] = useState<string>("");
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodoContext();
 
