@@ -17,8 +17,11 @@ export type Todo = {
 
 type TodoContextType = {
   todos: Todo[];
-  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+  addTodo: (todo: Todo) => void;
+  toggleTodo: (todoId: string, completed: boolean) => void;
+  deleteTodo: (todoOd: string) => void;
 };
+
 const getTodoFromLocalStorage = () => {
   const values = localStorage.getItem(LOCAL_STORAGE_KEY);
   return values ? JSON.parse(values) : [];
@@ -26,6 +29,25 @@ const getTodoFromLocalStorage = () => {
 export default function TodoContextProvider({ children }: PropsWithChildren) {
   const [todos, setTodos] = useState<Todo[]>(getTodoFromLocalStorage());
 
+  const addTodo = (todo: Todo) => {
+    setTodos((prevTodo: Todo[]) => {
+      return [...prevTodo, todo];
+    });
+  };
+
+  const toggleTodo = (todoId: string, completed: boolean) => {
+    setTodos((prevTodos: Todo[]) => {
+      return prevTodos.map((todo) =>
+        todo.id === todoId ? { ...todo, completed } : todo
+      );
+    });
+  };
+
+  const deleteTodo = (todoId: string) => {
+    setTodos((prevTodo: Todo[]) => {
+      return prevTodo.filter((todo) => todo.id !== todoId);
+    });
+  };
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
@@ -33,7 +55,9 @@ export default function TodoContextProvider({ children }: PropsWithChildren) {
     <TodoContext.Provider
       value={{
         todos,
-        setTodos,
+        addTodo,
+        toggleTodo,
+        deleteTodo,
       }}
     >
       {children}

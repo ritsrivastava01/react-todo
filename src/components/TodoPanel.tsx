@@ -1,40 +1,25 @@
 import { FormEvent, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Todo, useTodoContext } from "../hooks/TodoContextProvider";
+import { Trash } from "phosphor-react";
 
 export default function TodoPanel() {
   const [todoName, setTodoName] = useState<string>("");
-  const { todos, setTodos } = useTodoContext();
-  const addTodo = (e: FormEvent<HTMLFormElement>) => {
+  const { todos, addTodo, toggleTodo, deleteTodo } = useTodoContext();
+
+  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setTodos((prevTodo: Todo[]) => {
-      return [
-        ...prevTodo,
-        {
-          title: todoName,
-          completed: false,
-          id: uuidv4(),
-        },
-      ];
+    addTodo({
+      title: todoName,
+      completed: false,
+      id: uuidv4(),
     });
     setTodoName("");
-  };
-  const toggleTodo = (todoId: string, completed: boolean) => {
-    setTodos((prevTodos: Todo[]) => {
-      return prevTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, completed } : todo
-      );
-    });
-    // setTodos((prevTodo: Todo[]) => {
-    //   return prevTodo.map((todo) =>
-    //     todo.id === todoId ? { ...todo, completed } : todo
-    //   );
-    // });
   };
 
   return (
     <>
-      <form className="flex flex-col" onSubmit={addTodo}>
+      <form className="flex flex-col" onSubmit={submitHandler}>
         <input
           type="text"
           value={todoName}
@@ -46,22 +31,33 @@ export default function TodoPanel() {
           Add
         </button>
       </form>
-      <ul className="list-none">
-        {todos.map((todo: Todo) => (
-          <div className="flex flex-row" key={todo.id}>
-            <label className="prose prose-h1 hover:font-bold cursor-pointer">
-              <input
-                type="checkbox"
-                className="mr-4"
-                checked={todo.completed}
-                onChange={(e) => toggleTodo(todo.id, e.target.checked)}
-                id={todo.id}
-              />
-              {todo.title}
-            </label>
-          </div>
-        ))}
-      </ul>
+
+      {todos.map((todo: Todo) => (
+        <div
+          className="flex w-full justify-between my-3 border-b border-slate-900/10"
+          key={todo.id}
+        >
+          <label
+            className={`prose prose-h1 hover:font-bold cursor-pointer ${
+              todo.completed ? "line-through" : ""
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="mr-4"
+              checked={todo.completed}
+              onChange={(e) => toggleTodo(todo.id, e.target.checked)}
+              id={todo.id}
+            />
+            {todo.title}
+          </label>
+          <Trash
+            className="pt-1 "
+            size={23}
+            onClick={() => deleteTodo(todo.id)}
+          />
+        </div>
+      ))}
     </>
   );
 }
